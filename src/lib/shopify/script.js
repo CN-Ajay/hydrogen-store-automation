@@ -9,29 +9,26 @@ const themeDir = path.resolve("./hydrogen-storefront"); // Your Hydrogen project
 
 export function logoutExistingSession() {
     execSync("shopify auth logout", {});
-    prepareHydrogenTheme();
 }
 //logoutExistingSession();
 
 
- function prepareHydrogenTheme(themeDir) {
+export function prepareHydrogenTheme(themeDir) {
     execSync("npm install", { cwd: themeDir });
     execSync('npm run build', { cwd: themeDir });
-    dummyGitCommit();
 }
 //prepareHydrogenTheme(themeDir);
 
- function dummyGitCommit(themeDir) {
+export function dummyGitCommit(themeDir) {
   execSync("git init", { cwd: themeDir });
   execSync('git config user.name "Test User"', { cwd: themeDir });
   execSync('git config user.email "test@user.user"', { cwd: themeDir });
   execSync('git add .', { cwd: themeDir });
   execSync('git commit -m "Auto-commit before deploy" || echo "No changes"', { cwd: themeDir });
-  hydrigenLink();
 }
 //dummyGitCommit(themeDir);
 
- function hydrigenLink() {
+export function hydrigenLink() {
   const ptyProcess = pty.spawn("shopify", ["hydrogen", "link"], {
     name: "xterm-color",
     cwd: themeDir,
