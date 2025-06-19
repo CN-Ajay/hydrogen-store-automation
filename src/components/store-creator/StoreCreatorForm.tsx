@@ -71,7 +71,7 @@ export default function StoreCreatorForm() {
 
   // Initialize React Hook Form
   const form = useForm<StoreFormData>({
-    resolver: zodResolver(storeFormSchema),
+    //resolver: zodResolver(storeFormSchema),
     defaultValues: initialFormData,
     mode: 'onChange',
   });
