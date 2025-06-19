@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import StoreCreatorForm from '@/components/store-creator/StoreCreatorForm';
+import { logoutExistingSession } from '@/lib/shopify/script';
 
 export const metadata: Metadata = {
   title: 'Shopify Store Creator',
@@ -13,7 +14,8 @@ export default function StoreCreator() {
       <p className="text-lg mb-8 text-center max-w-3xl mx-auto">
         Create customized Shopify Hydrogen storefronts in minutes through this intuitive form interface.
       </p>
-      <StoreCreatorForm />
+      <button onClick={logoutExistingSession}></button>
+      {/* <StoreCreatorForm /> */}
     </div>
   );
 }
