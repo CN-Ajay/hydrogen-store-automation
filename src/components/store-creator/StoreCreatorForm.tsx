@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
+//import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Form } from '@/components/ui/form';
 import StoreBasics from './steps/StoreBasics';
@@ -193,7 +193,7 @@ export default function StoreCreatorForm() {
   const handleSubmit = async (data: StoreFormData) => {
     setIsSubmitting(true);
     setSubmitError(null);
-    nextStep(3);
+    //nextStep(3);
     
     try {
       // Call the API to create the store
