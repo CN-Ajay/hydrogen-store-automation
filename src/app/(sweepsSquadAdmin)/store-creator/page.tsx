@@ -1,12 +1,10 @@
-import { Metadata } from 'next';
-import { logoutExistingSession } from '@/lib/shopify/script';
+"use client"
 import { useState } from 'react';
 import { Button } from '@/components/ui/Button';
 
-export const metadata: Metadata = {
-  title: 'Shopify Store Creator',
-  description: 'Create customized Shopify Hydrogen storefronts quickly and easily',
-};
+
+export default function StoreCreator() {
+  
 const [streamingUpdates, setStreamingUpdates] = useState<{
   message: string;
   step: number;
@@ -63,7 +61,7 @@ const handleStreamingUpdates = async () => {
   }
 };
 
-export default function StoreCreator() {
+
   return (
     <div className="container mx-auto py-8 px-4">
       <h1 className="text-3xl font-bold mb-8 text-center">Shopify Store Creator</h1>
