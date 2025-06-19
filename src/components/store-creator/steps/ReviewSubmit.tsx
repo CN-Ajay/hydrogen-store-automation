@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { UseFormReturn } from 'react-hook-form';
 import { StoreFormData } from '../StoreCreatorForm';
 import { Button } from '@/components/ui/Button';
@@ -69,6 +70,64 @@ export default function ReviewSubmit({
     );
   }
 
+  // State to track streaming updates
+  const [streamingUpdates, setStreamingUpdates] = useState<{
+    message: string;
+    step: number;
+    progress: number;
+    storeUrl?: string;
+    error?: string;
+  } | null>(null);
+
+  // Function to handle streaming updates from the server
+  const handleStreamingUpdates = async () => {
+    // Set initial state
+    setStreamingUpdates({
+      message: "Preparing to create store...",
+      step: 0,
+      progress: 0
+    });
+
+    try {
+      // Create EventSource connection to the streaming API
+      const eventSource = new EventSource('/api/stream-updates');
+      
+      // Handle incoming messages
+      eventSource.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        console.log('Received update:', data);
+        
+        // Update state with the new data
+        setStreamingUpdates(data);
+        
+        // If we received the final message with a storeUrl, update the form state
+        if (data.progress === 100 && data.storeUrl) {
+          // Close the connection
+          eventSource.close();
+          
+          // Submit the form data to the actual API
+          form.handleSubmit(handleSubmit)();
+        }
+      };
+      
+      // Handle errors
+      eventSource.onerror = (error) => {
+        console.error('EventSource error:', error);
+        setStreamingUpdates(prev => prev ? {
+          ...prev,
+          error: 'Connection to server lost. Please try again.'
+        } : null);
+        eventSource.close();
+      };
+    } catch (error) {
+      console.error('Error setting up EventSource:', error);
+      setStreamingUpdates(prev => prev ? {
+        ...prev,
+        error: 'Failed to connect to server. Please try again.'
+      } : null);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="space-y-4">
@@ -77,6 +136,21 @@ export default function ReviewSubmit({
           Please review your store configuration before submitting.
         </p>
       </div>
+      
+      {streamingUpdates && (
+        <div className="border dark:border-gray-700 rounded-md overflow-hidden p-4">
+          <h3 className="text-lg font-medium mb-2">{streamingUpdates.message}</h3>
+          <div className="w-full bg-gray-200 rounded-full h-2.5 mb-4 dark:bg-gray-700">
+            <div 
+              className="bg-blue-600 h-2.5 rounded-full transition-all duration-500 ease-in-out" 
+              style={{ width: `${streamingUpdates.progress}%` }}
+            ></div>
+          </div>
+          {streamingUpdates.error && (
+            <p className="text-red-500 mt-2">{streamingUpdates.error}</p>
+          )}
+        </div>
+      )}
 
 
       <div className="space-y-6">
@@ -181,16 +255,16 @@ export default function ReviewSubmit({
         </Button>
         <Button
           type="button"
-          onClick={form.handleSubmit(handleSubmit)}
-          disabled={isSubmitting}
+          onClick={handleStreamingUpdates}
+          disabled={isSubmitting || streamingUpdates !== null}
         >
-          {isSubmitting ? (
+          {isSubmitting || streamingUpdates ? (
             <>
               <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
               </svg>
-              Creating Store...
+              {streamingUpdates ? 'Processing...' : 'Creating Store...'}
             </>
           ) : (
             'Create Store'
